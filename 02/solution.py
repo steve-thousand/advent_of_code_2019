@@ -1,44 +1,21 @@
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
+from intcode import IntcodeComputer
+
 def solve(input):
-    def initializeMemory(input):
-        return map(lambda x: int(x), input.split(","))
 
-    def run(memory):
-        instruction_pointer = 0
-        while instruction_pointer <= len(input):
-            this = memory[instruction_pointer]
-            if this == 1:
-                sum = memory[memory[instruction_pointer +
-                                    1]] + memory[memory[instruction_pointer +
-                                                        2]]
-                memory[memory[instruction_pointer + 3]] = sum
-                instruction_pointer += 4
-            elif this == 2:
-                mul = memory[memory[instruction_pointer +
-                                    1]] * memory[memory[instruction_pointer +
-                                                        2]]
-                memory[memory[instruction_pointer + 3]] = mul
-                instruction_pointer += 4
-            elif this == 99:
-                break
-            else:
-                raise Exception("Oops")
-
-    memory = initializeMemory(input)
+    intcodeComputer = IntcodeComputer(input, 12, 2)
 
     # part 1
-    memory[1] = 12
-    memory[2] = 2
-    run(memory)
-    print(memory[0])
+    intcodeComputer.run()
+    print(intcodeComputer.get(0))
 
     # part 2, i'm lazy so i'll just brute force it
     for noun in range(0, 99):
         for verb in range(0, 99):
-            memory = initializeMemory(input)
-            memory[1] = noun
-            memory[2] = verb
-            run(memory)
-            if memory[0] == 19690720:
+            intcodeComputer = IntcodeComputer(input, noun, verb)
+            intcodeComputer.run()
+            if intcodeComputer.get(0) == 19690720:
                 print((100 * noun) + verb)
 
 
