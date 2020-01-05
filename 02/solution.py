@@ -2,9 +2,10 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from intcode import IntcodeComputer
 
+
 def solve(input):
 
-    intcodeComputer = IntcodeComputer(input, 12, 2)
+    intcodeComputer = IntcodeComputer(input, noun=12, verb=2)
 
     # part 1
     intcodeComputer.run()
