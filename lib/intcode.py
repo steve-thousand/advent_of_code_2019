@@ -75,7 +75,7 @@ class Break(Operation):
 
 class Input(Operation):
     def execute(self, m, i):
-        m[m[i + 1]] = self.op_params.input
+        m[m[i + 1]] = self.op_params.input.pop(0)
         return OperationResult(True, i + 2)
 
 
@@ -147,12 +147,15 @@ operations = {
 
 
 class IntcodeComputer:
-    def __init__(self, source, noun=None, verb=None, input=0):
+    def __init__(self, source, noun=None, verb=None, input=[]):
         self.memory = list(map(lambda x: int(x), source.split(",")))
         if noun:
             self.memory[1] = noun
         if verb:
             self.memory[2] = verb
+
+        if isinstance(input, int):
+            input = [input]
         self.input = input
 
     def run(self):

@@ -107,19 +107,22 @@ class LessThanOperationTests(unittest.TestCase):
 class EqualsOperationTests(unittest.TestCase):
     def test(self):
         # position mode
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8", input=7)
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
+                                          input=[7])
         self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8", input=8)
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
+                                          input=[8])
         self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8", input=9)
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
+                                          input=[9])
         self.assertEqual(0, intcodeComputer.run())
 
         # immediate mode
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=7)
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[7])
         self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=8)
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[8])
         self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=9)
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[9])
         self.assertEqual(0, intcodeComputer.run())
 
 
