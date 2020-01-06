@@ -30,8 +30,8 @@ def solve(input):
 
     seen = {}
 
-    minDistance = sys.maxint
-    minSteps = sys.maxint
+    minDistance = sys.maxsize
+    minSteps = sys.maxsize
 
     for wireNumber, moves in enumerate(input.split("\n")):
         position = Point(0, 0)
@@ -45,7 +45,7 @@ def solve(input):
                     seen[currentPoint] = steps
                 else:
                     if currentPoint in seen:
-                        if currentPoint.manhattanDistance() < min:
+                        if currentPoint.manhattanDistance() < minDistance:
                             minDistance = currentPoint.manhattanDistance()
                         if seen[currentPoint] + steps < minSteps:
                             minSteps = seen[currentPoint] + steps

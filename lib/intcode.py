@@ -158,13 +158,14 @@ class IntcodeComputer:
             input = [input]
         self.input = input
 
-    def run(self):
+    def run(self, input=[]):
+        if input is None:
+            input = self.input
         memory = self.memory
         instruction_pointer = 0
         output = None
         while instruction_pointer <= len(memory):
-            operation = Operation.parseOp(str(memory[instruction_pointer]),
-                                          self.input)
+            operation = Operation.parseOp(str(memory[instruction_pointer]), input)
             result = operation.execute(memory, instruction_pointer)
             if result.output is not None:
                 output = result.output

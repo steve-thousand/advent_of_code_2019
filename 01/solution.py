@@ -1,7 +1,7 @@
 def solve(input):
 
     def getFuelRequiredForMass(mass):
-        return (int(mass) / 3) - 2
+        return (int(mass) // 3) - 2
 
     total1 = 0
     total2 = 0
