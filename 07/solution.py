@@ -4,33 +4,37 @@ from intcode import IntcodeComputer
 
 from itertools import permutations
 
+
 class Amplifier:
-    def __init__(self, input_string, phase):
+    def __init__(self, input_string, phase, feedback_mode=False):
         self.intcode_computer = IntcodeComputer(input_string)
         self.phase = phase
+        self.feedback_mode = feedback_mode
 
     def run(self, input=0):
-        return self.intcode_computer.run([self.phase, input])
+        return self.intcode_computer.run([self.phase, input],
+                                         feedback_mode=self.feedback_mode)
 
 
 def solve(input_string):
-
-    def runAmplifiers(phase_setting, feedback_mode=False):
+    def runAmplifiers(input_string, phase_setting, feedback_mode=False):
         '''Run the series of amplifiers with the provided phase setting'''
         # build amplifiers
-        amplifiers = map(lambda i: Amplifier(input_string, i), phase_setting)
+        amplifiers = list(
+            map(lambda i: Amplifier(input_string, i, feedback_mode),
+                phase_setting))
 
         last_output = 0
         while True:
             for amplifier in amplifiers:
                 last_output = amplifier.run(last_output)
-            if not feedback_mode:
+            if not feedback_mode or amplifiers[-1].intcode_computer.halted:
                 break
         return last_output
 
     def getMaxSignalForInput(input_string, feedback_mode=False):
         '''Print the max signal and phase setting for the provided input string'''
-        max = 0
+        max_signal = 0
         max_phase = None
 
         if feedback_mode:
@@ -39,19 +43,19 @@ def solve(input_string):
             perm = permutations([0, 1, 2, 3, 4])
 
         for i in perm:
-            output = runAmplifiers(i, feedback_mode)
-            if output > max:
-                max = output
+            output = runAmplifiers(input_string, i, feedback_mode)
+            if output > max_signal:
+                max_signal = output
                 max_phase = i
 
-        print(max)
+        print(max_signal)
         print(max_phase)
 
     # default
-    # getMaxSignalForInput(input_string)
+    getMaxSignalForInput(input_string)
 
     # feedback
-    getMaxSignalForInput("3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5", feedback_mode=True)
+    getMaxSignalForInput(input_string, feedback_mode=True)
 
     return
 

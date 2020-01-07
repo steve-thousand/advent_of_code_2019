@@ -24,37 +24,37 @@ class IntcodeComputerTests(unittest.TestCase):
 
     def test(self):
         for i in self.testCases:
-            intcodeComputer = IntcodeComputer(i[0], input=1)
-            intcodeComputer.run()
+            intcodeComputer = IntcodeComputer(i[0])
+            intcodeComputer.run([1])
             self.assertEqual(i[1], intcodeComputer.memory)
 
     def testOuput(self):
-        intcodeComputer = IntcodeComputer("3,0,4,4,99", input=1)
-        output = intcodeComputer.run()
+        intcodeComputer = IntcodeComputer("3,0,4,4,99")
+        output = intcodeComputer.run([1])
         self.assertEqual(99, output)
 
     def testJump(self):
         # position mode
         intcodeComputer = IntcodeComputer(
-            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", input=-1)
-        self.assertEqual(1, intcodeComputer.run())
+            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9")
+        self.assertEqual(1, intcodeComputer.run([-1]))
         intcodeComputer = IntcodeComputer(
-            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", input=0)
-        self.assertEqual(0, intcodeComputer.run())
+            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9")
+        self.assertEqual(0, intcodeComputer.run([0]))
         intcodeComputer = IntcodeComputer(
-            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", input=1)
-        self.assertEqual(1, intcodeComputer.run())
+            "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9")
+        self.assertEqual(1, intcodeComputer.run([1]))
 
         # immediate mode
         intcodeComputer = IntcodeComputer(
-            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1", input=-1)
-        self.assertEqual(1, intcodeComputer.run())
+            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1")
+        self.assertEqual(1, intcodeComputer.run([-1]))
         intcodeComputer = IntcodeComputer(
-            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1", input=0)
-        self.assertEqual(0, intcodeComputer.run())
+            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1")
+        self.assertEqual(0, intcodeComputer.run([0]))
         intcodeComputer = IntcodeComputer(
-            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1", input=1)
-        self.assertEqual(1, intcodeComputer.run())
+            "3,3,1105,-1,9,1101,0,0,12,4,12,99,1")
+        self.assertEqual(1, intcodeComputer.run([1]))
 
 
 class SumOperationTests(unittest.TestCase):
@@ -88,42 +88,39 @@ class MultiplyOperationTests(unittest.TestCase):
 class LessThanOperationTests(unittest.TestCase):
     def test(self):
         # position mode
-        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8", input=7)
-        self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8", input=8)
-        self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8", input=9)
-        self.assertEqual(0, intcodeComputer.run())
+        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8")
+        self.assertEqual(1, intcodeComputer.run([7]))
+        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8")
+        self.assertEqual(0, intcodeComputer.run([8]))
+        intcodeComputer = IntcodeComputer("3,9,7,9,10,9,4,9,99,-1,8")
+        self.assertEqual(0, intcodeComputer.run([9]))
 
         # immediate mode
-        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99", input=7)
-        self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99", input=8)
-        self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99", input=9)
-        self.assertEqual(0, intcodeComputer.run())
+        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99")
+        self.assertEqual(1, intcodeComputer.run([7]))
+        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99")
+        self.assertEqual(0, intcodeComputer.run([8]))
+        intcodeComputer = IntcodeComputer("3,3,1107,-1,8,3,4,3,99")
+        self.assertEqual(0, intcodeComputer.run([9]))
 
 
 class EqualsOperationTests(unittest.TestCase):
     def test(self):
         # position mode
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
-                                          input=[7])
-        self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
-                                          input=[8])
-        self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8",
-                                          input=[9])
-        self.assertEqual(0, intcodeComputer.run())
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8")
+        self.assertEqual(0, intcodeComputer.run([7]))
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8")
+        self.assertEqual(1, intcodeComputer.run([8]))
+        intcodeComputer = IntcodeComputer("3,9,8,9,10,9,4,9,99,-1,8")
+        self.assertEqual(0, intcodeComputer.run([9]))
 
         # immediate mode
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[7])
-        self.assertEqual(0, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[8])
-        self.assertEqual(1, intcodeComputer.run())
-        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99", input=[9])
-        self.assertEqual(0, intcodeComputer.run())
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99")
+        self.assertEqual(0, intcodeComputer.run([7]))
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99")
+        self.assertEqual(1, intcodeComputer.run([8]))
+        intcodeComputer = IntcodeComputer("3,3,1108,-1,8,3,4,3,99")
+        self.assertEqual(0, intcodeComputer.run([9]))
 
 
 unittest.main()

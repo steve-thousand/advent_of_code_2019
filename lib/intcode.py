@@ -75,7 +75,7 @@ class Break(Operation):
 
 class Input(Operation):
     def execute(self, m, i):
-        m[m[i + 1]] = self.op_params.input.pop(0)
+        m[m[i + 1]] = self.op_params.input
         return OperationResult(True, i + 2)
 
 
@@ -147,33 +147,42 @@ operations = {
 
 
 class IntcodeComputer:
-    def __init__(self, source, noun=None, verb=None, input=[]):
+    def __init__(self, source, noun=None, verb=None):
         self.memory = list(map(lambda x: int(x), source.split(",")))
         if noun:
             self.memory[1] = noun
         if verb:
             self.memory[2] = verb
 
-        if isinstance(input, int):
-            input = [input]
-        self.input = input
+        self.halted = False
+        self.instruction_pointer = 0
+        self.output = 0
 
-    def run(self, input=[]):
-        if input is None:
-            input = self.input
+    def run(self, input=[], feedback_mode=False):
         memory = self.memory
-        instruction_pointer = 0
-        output = None
-        while instruction_pointer <= len(memory):
-            operation = Operation.parseOp(str(memory[instruction_pointer]), input)
-            result = operation.execute(memory, instruction_pointer)
-            if result.output is not None:
-                output = result.output
-            if not result.should_continue:
-                break
-            instruction_pointer = result.instruction_pointer
+        while self.instruction_pointer <= len(memory):
 
-        return output
+            # this is kinda weird
+            i = None
+            if input:
+                if self.instruction_pointer == 0:
+                    i = input[0]
+                else:
+                    i = input[-1]
+
+            operation = Operation.parseOp(
+                str(memory[self.instruction_pointer]), i)
+            result = operation.execute(memory, self.instruction_pointer)
+            self.instruction_pointer = result.instruction_pointer
+            if result.output is not None:
+                self.output = result.output
+                if feedback_mode:
+                    break
+            if not result.should_continue:
+                self.halted = True
+                break
+
+        return self.output
 
     def get(self, address):
         return self.memory[address]

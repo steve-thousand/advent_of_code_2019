@@ -5,13 +5,13 @@ from intcode import IntcodeComputer
 
 def solve(input):
     print("TEST ID 1")
-    intcodeComputer = IntcodeComputer(input, input=[1])
-    output = intcodeComputer.run()
+    intcodeComputer = IntcodeComputer(input)
+    output = intcodeComputer.run(input=[1])
     print("diagnostic code: " + str(output))
 
     print("TEST ID 5")
-    intcodeComputer = IntcodeComputer(input, input=[5])
-    output = intcodeComputer.run()
+    intcodeComputer = IntcodeComputer(input)
+    output = intcodeComputer.run(input=[5])
     print("diagnostic code: " + str(output))
     return
 
