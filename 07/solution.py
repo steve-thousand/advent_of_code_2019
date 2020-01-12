@@ -6,44 +6,44 @@ from itertools import permutations
 
 
 class Amplifier:
-    def __init__(self, input_string, phase, feedback_mode=False):
+    def __init__(self, input_string, phase, return_on_output=False):
         self.intcode_computer = IntcodeComputer(input_string)
         self.phase = phase
-        self.feedback_mode = feedback_mode
+        self.return_on_output = return_on_output
 
     def run(self, input=0):
-        return self.intcode_computer.run([self.phase, input],
-                                         feedback_mode=self.feedback_mode)
+        return self.intcode_computer.run(
+            [self.phase, input], return_on_output=self.return_on_output)
 
 
 def solve(input_string):
-    def runAmplifiers(input_string, phase_setting, feedback_mode=False):
+    def runAmplifiers(input_string, phase_setting, return_on_output=False):
         '''Run the series of amplifiers with the provided phase setting'''
         # build amplifiers
         amplifiers = list(
-            map(lambda i: Amplifier(input_string, i, feedback_mode),
+            map(lambda i: Amplifier(input_string, i, return_on_output),
                 phase_setting))
 
         last_output = 0
         while True:
             for amplifier in amplifiers:
                 last_output = amplifier.run(last_output)
-            if not feedback_mode or amplifiers[-1].intcode_computer.halted:
+            if not return_on_output or amplifiers[-1].intcode_computer.halted:
                 break
         return last_output
 
-    def getMaxSignalForInput(input_string, feedback_mode=False):
+    def getMaxSignalForInput(input_string, return_on_output=False):
         '''Print the max signal and phase setting for the provided input string'''
         max_signal = 0
         max_phase = None
 
-        if feedback_mode:
+        if return_on_output:
             perm = permutations([5, 6, 7, 8, 9])
         else:
             perm = permutations([0, 1, 2, 3, 4])
 
         for i in perm:
-            output = runAmplifiers(input_string, i, feedback_mode)
+            output = runAmplifiers(input_string, i, return_on_output)
             if output > max_signal:
                 max_signal = output
                 max_phase = i
@@ -55,7 +55,7 @@ def solve(input_string):
     getMaxSignalForInput(input_string)
 
     # feedback
-    getMaxSignalForInput(input_string, feedback_mode=True)
+    getMaxSignalForInput(input_string, return_on_output=True)
 
     return
 

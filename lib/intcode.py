@@ -40,7 +40,7 @@ class IntcodeComputerV2:
 
         self.relative_base = 0
 
-    def run(self, input_values=[], feedback_mode=False):
+    def run(self, input_values=[], return_on_output=False):
         instruction_pointer = self.instruction_pointer
         memory = self.memory
         relative_base = self.relative_base
@@ -107,7 +107,7 @@ class IntcodeComputerV2:
                 args = getArguments(1)
                 output = parseArg(0)
                 instruction_pointer += 2
-                if feedback_mode:
+                if return_on_output:
                     break
             elif opCode == 5:
                 # jump if true

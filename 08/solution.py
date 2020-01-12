@@ -54,7 +54,8 @@ def solve(input_string):
                     decoded[i][j] = layer[i][j]
                     break
 
-    print('\n'.join(''.join(str(number) for number in row) for row in decoded))
+    print('\n'.join(''.join(("▓" if number else " ") for number in row)
+                    for row in decoded))
 
 
 solve(
