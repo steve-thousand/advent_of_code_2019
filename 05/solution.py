@@ -1,17 +1,17 @@
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
-from intcode import IntcodeComputer
+from intcode import IntcodeComputerV2 as IntcodeComputer
 
 
 def solve(input):
     print("TEST ID 1")
     intcodeComputer = IntcodeComputer(input)
-    output = intcodeComputer.run(input=[1])
+    output = intcodeComputer.run(input_values=[1])
     print("diagnostic code: " + str(output))
 
     print("TEST ID 5")
     intcodeComputer = IntcodeComputer(input)
-    output = intcodeComputer.run(input=[5])
+    output = intcodeComputer.run(input_values=[5])
     print("diagnostic code: " + str(output))
     return
 

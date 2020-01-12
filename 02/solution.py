@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
-from intcode import IntcodeComputer
+from intcode import IntcodeComputerV2 as IntcodeComputer
 
 
 def solve(input):
@@ -9,15 +9,16 @@ def solve(input):
 
     # part 1
     intcodeComputer.run()
-    print(intcodeComputer.get(0))
+    print(intcodeComputer.memory[0])
 
     # part 2, i'm lazy so i'll just brute force it
     for noun in range(0, 99):
         for verb in range(0, 99):
             intcodeComputer = IntcodeComputer(input, noun, verb)
             intcodeComputer.run()
-            if intcodeComputer.get(0) == 19690720:
+            if intcodeComputer.memory[0] == 19690720:
                 print((100 * noun) + verb)
+                return
 
 
 solve(

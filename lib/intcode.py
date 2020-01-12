@@ -1,188 +1,153 @@
-from abc import ABC
+# this is pretty gross, but fuck it
+class Memory(list):
+    def __init__(self, size):
+        self.data = {}
+        self.size = size
+        for i in range(0, size):
+            self.append(0)
 
+    def __getitem__(self, index):
+        if index > self.size - 1:
+            if index not in self.data:
+                self.data[index] = 0
+            return self.data[index]
+        return super().__getitem__(index)
 
-class OperationResult:
-    def __init__(self, should_continue, instruction_pointer, output=None):
-        self.should_continue = should_continue
-        self.instruction_pointer = instruction_pointer
-        self.output = output
-
-
-class Operation(ABC):
-    def __init__(self, op_params):
-        self.op_params = op_params
-
-    def execute(self, memory, instruction_pointer):
-        '''Should return OperationResult'''
-        pass
-
-    def get(self, memory, argument, mode):
-        '''Retrieve from memory given an argument and an argument mode'''
-        if self.op_params.modes[mode] == 1:
-            return memory[argument]
-        elif self.op_params.modes[mode] == 0:
-            return memory[memory[argument]]
+    def __setitem__(self, index, value):
+        if index > self.size - 1:
+            self.data[index] = value
         else:
-            raise Exception("Invalid mode: " + str(mode))
-
-    @staticmethod
-    def parseOp(op, input=None):
-        opCode = int(op[-2:])
-        modes = [0, 0, 0]
-        if len(op) > 2:
-            modes_string = op[:-2]
-            modes_string = modes_string.rjust(3, '0')
-            modes = [
-                int(modes_string[2]),
-                int(modes_string[1]),
-                int(modes_string[0])
-            ]
-        return operations[opCode](OpParams(modes, input))
+            super().__setitem__(index, value)
 
 
-class Sum(Operation):
-    def execute(self, m, i):
-        # resolve first argument
-        first_value = self.get(m, i + 1, 0)
-
-        # resolve second argument
-        second_value = self.get(m, i + 2, 1)
-
-        # write to third argument
-        m[m[i + 3]] = first_value + second_value
-
-        return OperationResult(True, i + 4)
-
-
-class Multiply(Operation):
-    def execute(self, m, i):
-        # resolve first argument
-        first_value = self.get(m, i + 1, 0)
-
-        # resolve second argument
-        second_value = self.get(m, i + 2, 1)
-
-        # write to third argument
-        m[m[i + 3]] = first_value * second_value
-
-        return OperationResult(True, i + 4)
-
-
-class Break(Operation):
-    def execute(self, m, i):
-        return OperationResult(False, i)
-
-
-class Input(Operation):
-    def execute(self, m, i):
-        m[m[i + 1]] = self.op_params.input
-        return OperationResult(True, i + 2)
-
-
-class Output(Operation):
-    def execute(self, m, i):
-        output = m[m[i + 1]]
-        return OperationResult(True, i + 2, output=output)
-
-
-class JumpIfTrue(Operation):
-    def execute(self, m, i):
-        value = self.get(m, i + 1, 0)
-        jump_to = self.get(m, i + 2, 1)
-        return OperationResult(True, jump_to if value else i + 3)
-
-
-class JumpIfFalse(Operation):
-    def execute(self, m, i):
-        value = self.get(m, i + 1, 0)
-        jump_to = self.get(m, i + 2, 1)
-        return OperationResult(True, jump_to if not value else i + 3)
-
-
-class LessThan(Operation):
-    def execute(self, m, i):
-        # resolve first argument
-        first_value = self.get(m, i + 1, 0)
-
-        # resolve second argument
-        second_value = self.get(m, i + 2, 1)
-
-        # write to third argument
-        m[m[i + 3]] = 1 if first_value < second_value else 0
-
-        return OperationResult(True, i + 4)
-
-
-class Equals(Operation):
-    def execute(self, m, i):
-        # resolve first argument
-        first_value = self.get(m, i + 1, 0)
-
-        # resolve second argument
-        second_value = self.get(m, i + 2, 1)
-
-        # write to third argument
-        m[m[i + 3]] = 1 if first_value == second_value else 0
-
-        return OperationResult(True, i + 4)
-
-
-class OpParams:
-    def __init__(self, modes, input=None):
-        self.modes = modes
-        self.input = input
-
-
-operations = {
-    1: lambda params: Sum(params),
-    2: lambda params: Multiply(params),
-    3: lambda params: Input(params),
-    4: lambda params: Output(params),
-    5: lambda params: JumpIfTrue(params),
-    6: lambda params: JumpIfFalse(params),
-    7: lambda params: LessThan(params),
-    8: lambda params: Equals(params),
-    99: lambda params: Break(params)
-}
-
-
-class IntcodeComputer:
-    def __init__(self, source, noun=None, verb=None):
-        self.memory = list(map(lambda x: int(x), source.split(",")))
-        if noun:
-            self.memory[1] = noun
-        if verb:
-            self.memory[2] = verb
-
-        self.halted = False
+class IntcodeComputerV2:
+    def __init__(self, input_string, noun=None, verb=None):
         self.instruction_pointer = 0
+
+        parts = input_string.split(",")
+        self.memory = Memory(len(parts))
+        for i, value in enumerate(parts):
+            self.memory[i] = int(value)
+
+        # self.memory = [int(i) for i in input_string.split(",")]
+        self.halted = False
         self.output = 0
 
-    def run(self, input=[], feedback_mode=False):
+        if noun is not None:
+            self.memory[1] = noun
+        if verb is not None:
+            self.memory[2] = verb
+
+        self.relative_base = 0
+
+    def run(self, input_values=[], feedback_mode=False):
+        instruction_pointer = self.instruction_pointer
         memory = self.memory
-        while self.instruction_pointer <= len(memory):
+        relative_base = self.relative_base
 
-            # this is kinda weird
-            i = None
-            if input:
-                if self.instruction_pointer == 0:
-                    i = input[0]
+        def getArguments(number_arguments):
+            start = instruction_pointer + 1
+            end = start + number_arguments
+            args = []
+            for i in range(start, end):
+                args.append(memory[i])
+            return args
+
+        output = self.output
+
+        while True:
+
+            instruction = str(memory[instruction_pointer])
+            instruction = instruction.rjust(5, '0')
+            opCode = int(instruction[-2:])
+            parts = [char for char in instruction]
+            modes = [int(i) for i in parts[0:3]]
+            modes.reverse()
+
+            args = []
+
+            def parseArg(index):
+                argument = args[index]
+                mode = modes[index]
+                if mode == 0:
+                    return memory[argument]
+                elif mode == 1:
+                    return argument
+                elif mode == 2:
+                    return memory[argument + relative_base]
                 else:
-                    i = input[-1]
+                    raise Exception("Invalid mode: " + mode)
 
-            operation = Operation.parseOp(
-                str(memory[self.instruction_pointer]), i)
-            result = operation.execute(memory, self.instruction_pointer)
-            self.instruction_pointer = result.instruction_pointer
-            if result.output is not None:
-                self.output = result.output
+            if opCode == 1:
+                # add
+                args = getArguments(3)
+                arg3 = args[2] + (relative_base if modes[2] == 2 else 0)
+                memory[arg3] = parseArg(0) + parseArg(1)
+                instruction_pointer += 4
+            elif opCode == 2:
+                # multiply
+                args = getArguments(3)
+                arg3 = args[2] + (relative_base if modes[2] == 2 else 0)
+                memory[arg3] = parseArg(0) * parseArg(1)
+                instruction_pointer += 4
+            elif opCode == 3:
+                # input
+                if input_values:
+                    if instruction_pointer == 0 or len(input_values) < 2:
+                        input_value = input_values[0]
+                    else:
+                        input_value = input_values[1]
+
+                args = getArguments(1)
+                arg0 = args[0] + (relative_base if modes[0] == 2 else 0)
+                memory[arg0] = input_value
+                instruction_pointer += 2
+            elif opCode == 4:
+                # output
+                args = getArguments(1)
+                output = parseArg(0)
+                instruction_pointer += 2
                 if feedback_mode:
                     break
-            if not result.should_continue:
+            elif opCode == 5:
+                # jump if true
+                args = getArguments(2)
+                if parseArg(0):
+                    instruction_pointer = parseArg(1)
+                else:
+                    instruction_pointer += 3
+            elif opCode == 6:
+                # jump if false
+                args = getArguments(2)
+                if not parseArg(0):
+                    instruction_pointer = parseArg(1)
+                else:
+                    instruction_pointer += 3
+            elif opCode == 7:
+                # less than
+                args = getArguments(3)
+                arg3 = args[2] + (relative_base if modes[2] == 2 else 0)
+                memory[arg3] = int(parseArg(0) < parseArg(1))
+                instruction_pointer += 4
+            elif opCode == 8:
+                # equals
+                args = getArguments(3)
+                arg3 = args[2] + (relative_base if modes[2] == 2 else 0)
+                memory[arg3] = int(parseArg(0) == parseArg(1))
+                instruction_pointer += 4
+            elif opCode == 9:
+                # relative base
+                args = getArguments(1)
+                relative_base = relative_base + parseArg(0)
+                instruction_pointer += 2
+            elif opCode == 99:
+                # halt
+                instruction_pointer += 1
                 self.halted = True
                 break
 
-        return self.output
+        self.instruction_pointer = instruction_pointer
+        self.relative_base = relative_base
+        self.output = output
 
-    def get(self, address):
-        return self.memory[address]
+        return output

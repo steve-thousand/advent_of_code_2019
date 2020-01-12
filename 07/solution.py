@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
-from intcode import IntcodeComputer
+from intcode import IntcodeComputerV2 as IntcodeComputer
 
 from itertools import permutations
 
