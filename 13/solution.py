@@ -3,32 +3,43 @@
 
 import sys, os, time, re, curses
 from typing import List
+from unittest.mock import call
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from intcode import IntcodeComputerV2 as IntcodeComputer
 
 objects = {0: ' ', 1: '▓', 2: '□', 3: '_', 4: 'o'}
 
-# def outputToScreen(outputs):
-#     max_x = 0
-#     max_y = 0
-#     while not intcodeComputer.halted:
-#         x = intcodeComputer.run(return_on_output=True)
-#         y = intcodeComputer.run(return_on_output=True)
-#         value = intcodeComputer.run(return_on_output=True)
-#         screen_dict[(x, y)] = value
-#         if x > max_x:
-#             max_x = x
-#         if y > max_y:
-#             max_y = y
+
+class Game:
+    def __init__(self):
+        self.score = 0
+        self.t = 0
+        self.tick_callbacks = []
+        return
+
+    def tick(self):
+        self.t += 1
+        for callback in self.tick_callbacks:
+            callback()
+
+    def getTick(self):
+        return self.t
+
+    def addTickCallback(self, tick_callback):
+        self.tick_callbacks.append(tick_callback)
 
 
 class OutputModule:
-    def __init__(self, console, height, width):
+    def __init__(self, game, console, height, width):
         '''
         Trying something here. Creating a module that will handle the output
         '''
+        self.game = game
+        game.addTickCallback(self.draw_screen)
         self.console = console
         self.output_buffer = []
+        self.height = height
+        self.width = width
         self.screen: List[List[int]] = [[0] * width for i in range(height)]
         self.score = 0
         self.tick = 0
@@ -41,25 +52,18 @@ class OutputModule:
             x = self.output_buffer[0]
             y = self.output_buffer[1]
 
-            if self.output_buffer[2] > 4:
-                z = 0
-
             if x == -1:
                 self.score = self.output_buffer[2]
             else:
                 self.screen[y][x] = self.output_buffer[2]
 
-            if y == len(self.screen) - 1 and x == len(self.screen[y]) - 1:
-                self.tick += 1
-
             self.output_buffer = []
-            self.draw_screen()
 
     def draw_screen(self):
         self.console.clear()
-        self.console.refresh()
         self.console.addstr(
-            0, 0, "score: " + str(self.score) + " tick: " + str(self.tick))
+            0, 0,
+            "score: " + str(self.score) + " tick: " + str(self.game.getTick()))
         for y in range(0, len(self.screen)):
             for x in range(0, len(self.screen[y])):
                 self.console.addstr(y + 1, x, objects[self.screen[y][x]])
@@ -70,8 +74,9 @@ class OutputModule:
 
 
 class InputModule:
-    def __init__(self, screen):
+    def __init__(self, game, screen):
         self.screen = screen
+        self.game = game
 
     def __call__(self):
         ball_x = 0
@@ -88,6 +93,10 @@ class InputModule:
             input = 1
         elif paddle_x > ball_x:
             input = -1
+
+        self.game.tick()
+        time.sleep(.01)
+
         return input
 
 
@@ -120,16 +129,16 @@ def solve(input_string):
     print(total_blocks)
 
     #part2
+    game = Game()
     console = curses.initscr()
-    output = OutputModule(console, max_y + 1, max_x + 1)
-    inputModule = InputModule(output.screen)
+    output = OutputModule(game, console, max_y + 1, max_x + 1)
+    inputModule = InputModule(game, output.screen)
     intcodeComputer = IntcodeComputer(input_string,
                                       noun=2,
                                       input_handler=inputModule,
                                       output_handler=output)
     while True:
         intcodeComputer.run()
-        time.sleep(1)
 
     curses.endwin()
 
