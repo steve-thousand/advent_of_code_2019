@@ -11,21 +11,26 @@ class Memory(list):
             if index not in self.data:
                 self.data[index] = 0
             return self.data[index]
-        return super().__getitem__(index)
+        return super(list).__getitem__(index)
 
     def __setitem__(self, index, value):
         if index > self.size - 1:
             self.data[index] = value
         else:
-            super().__setitem__(index, value)
+            super(list).__setitem__(index, value)
 
 
 class IntcodeComputerV2:
-    def __init__(self, input_string, noun=None, verb=None):
+    def __init__(self,
+                 input_string,
+                 noun=None,
+                 verb=None,
+                 input_handler=None,
+                 output_handler=None):
         self.instruction_pointer = 0
 
         parts = input_string.split(",")
-        self.memory = Memory(len(parts))
+        self.memory = {}
         for i, value in enumerate(parts):
             self.memory[i] = int(value)
 
@@ -37,6 +42,9 @@ class IntcodeComputerV2:
             self.memory[1] = noun
         if verb is not None:
             self.memory[2] = verb
+
+        self.input_handler = input_handler
+        self.output_handler = output_handler
 
         self.relative_base = 0
 
@@ -92,11 +100,16 @@ class IntcodeComputerV2:
                 instruction_pointer += 4
             elif opCode == 3:
                 # input
-                if input_values:
-                    if instruction_pointer == 0 or len(input_values) < 2:
-                        input_value = input_values[0]
+                if self.input_handler:
+                    input_value = self.input_handler()
+                else:
+                    if input_values:
+                        if instruction_pointer == 0 or len(input_values) < 2:
+                            input_value = input_values[0]
+                        else:
+                            input_value = input_values[1]
                     else:
-                        input_value = input_values[1]
+                        input_value = 0
 
                 args = getArguments(1)
                 arg0 = args[0] + (relative_base if modes[0] == 2 else 0)
@@ -107,6 +120,8 @@ class IntcodeComputerV2:
                 args = getArguments(1)
                 output = parseArg(0)
                 instruction_pointer += 2
+                if self.output_handler:
+                    self.output_handler(output)
                 if return_on_output:
                     break
             elif opCode == 5:
