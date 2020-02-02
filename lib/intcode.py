@@ -47,6 +47,7 @@ class IntcodeComputerV2:
         self.output_handler = output_handler
 
         self.relative_base = 0
+        self.exit = False
 
     def run(self, input_values=[], return_on_output=False):
         instruction_pointer = self.instruction_pointer
@@ -63,7 +64,7 @@ class IntcodeComputerV2:
 
         output = self.output
 
-        while True:
+        while True and not self.exit:
 
             instruction = str(memory[instruction_pointer])
             instruction = instruction.rjust(5, '0')
@@ -121,7 +122,7 @@ class IntcodeComputerV2:
                 output = parseArg(0)
                 instruction_pointer += 2
                 if self.output_handler:
-                    self.output_handler(output)
+                    self.output_handler(output, self)
                 if return_on_output:
                     break
             elif opCode == 5:
