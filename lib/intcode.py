@@ -83,6 +83,8 @@ class IntcodeComputerV2:
                 elif mode == 1:
                     return argument
                 elif mode == 2:
+                    if argument + relative_base not in memory:
+                        memory[argument + relative_base] = 0
                     return memory[argument + relative_base]
                 else:
                     raise Exception("Invalid mode: " + mode)
